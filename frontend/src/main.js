@@ -5,6 +5,7 @@ import { DetailsModal } from "./containers/components/details-modal.js";
 import { BestFilms } from "./containers/components/best-films.js";
 import { MysteryFilms } from "./containers/components/mystery.js";
 import { SciFiFilms } from "./containers/components/sci-fi.js";
+import { SelectCategory } from "./containers/components/select-cat.js";
 
 function App() {
   return `
@@ -16,6 +17,7 @@ function App() {
         ${BestFilms()}
         ${MysteryFilms()}
         ${SciFiFilms()}
+        ${SelectCategory()}
       </div>
     </div>
   `;
