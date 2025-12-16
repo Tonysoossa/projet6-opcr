@@ -1,7 +1,7 @@
 export function DetailsModal() {
   const html = `
    <div id="movie-modal-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden justify-center items-center z-50">
-      <div class="bg-gray-100 max-w-6xl w-full p-4 md:p-12 overflow-y-auto max-h-[90vh] relative border-4 border-black">
+      <div class="bg-gray-100 max-w-6xl w-full p-4 md:p-12 overflow-y-auto max-h-[90vh] relative border-4 border-black pt-20">
 
         <button id="modal_close_btn_mobile" class="md:hidden absolute top-4 right-4 text-red-600 hover:text-red-700 text-5xl font-bold transition cursor-pointer z-10 leading-none">
           ×
