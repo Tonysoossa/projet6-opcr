@@ -1,12 +1,12 @@
 export function SelectCategory() {
   const html = `
     <section class="w-full mb-12">
-      <div class="flex items-center gap-4 mb-6">
+      <div class="flex flex-col md:flex-row md:items-center gap-4 mb-6">
         <h2 class="text-4xl font-bold text-black">Autres :</h2>
-        <div class="relative">
+        <div class="relative w-full md:w-auto">
           <select
             id="category-select"
-            class="text-2xl font-semibold text-black bg-white border-2 border-black px-4 py-2 pr-12 rounded cursor-pointer hover:bg-gray-50 transition appearance-none"
+            class="text-2xl font-semibold text-black bg-white border-2 border-black px-4 py-2 pr-12 rounded cursor-pointer hover:bg-gray-50 transition appearance-none w-full"
           >
             <option value="">Sélectionner une catégorie</option>
           </select>
@@ -18,6 +18,11 @@ export function SelectCategory() {
         </div>
       </div>
       <div id="select-cat-films-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      </div>
+      <div id="select-cat-toggle-container" class="lg:hidden flex justify-center mt-6 hidden">
+        <button id="select-cat-toggle-btn" class="bg-red-600 text-white text-2xl font-normal px-16 py-4 rounded-full hover:bg-red-700 transition">
+          Voir plus
+        </button>
       </div>
     </section>
   `;
@@ -49,14 +54,17 @@ export function SelectCategory() {
         console.error("Erreur lors du chargement des catégories:", error);
       });
 
-    // Gérer le changement de catégorie
     document.addEventListener("change", (e) => {
       if (e.target.id === "category-select") {
         const selectedGenre = e.target.value;
         const grid = document.getElementById("select-cat-films-grid");
+        const toggleContainer = document.getElementById(
+          "select-cat-toggle-container",
+        );
 
         if (!selectedGenre || !grid) {
           if (grid) grid.innerHTML = "";
+          if (toggleContainer) toggleContainer.classList.add("hidden");
           return;
         }
 
@@ -71,6 +79,7 @@ export function SelectCategory() {
             if (!data.results || data.results.length === 0) {
               grid.innerHTML =
                 '<p class="text-black col-span-3 text-center text-xl">Aucun film trouvé pour cette catégorie.</p>';
+              if (toggleContainer) toggleContainer.classList.add("hidden");
               return;
             }
 
@@ -78,9 +87,17 @@ export function SelectCategory() {
             const selectedMovies = shuffled.slice(0, 6);
 
             grid.innerHTML = selectedMovies
-              .map(
-                (movie) => `
-              <div class="relative w-full h-[250px] overflow-hidden group cursor-pointer">
+              .map((movie, index) => {
+                let hiddenClass = "";
+                if (index >= 2 && index < 4) {
+                  hiddenClass = "hidden md:block";
+                }
+                if (index >= 4) {
+                  hiddenClass = "hidden md:hidden lg:block";
+                }
+
+                return `
+              <div class="movie-card relative w-full h-[250px] overflow-hidden group cursor-pointer ${hiddenClass}" data-index="${index}">
                 <img
                   src="${movie.image_url}"
                   alt="${movie.title}"
@@ -100,9 +117,46 @@ export function SelectCategory() {
                   </div>
                 </div>
               </div>
-            `,
-              )
+            `;
+              })
               .join("");
+
+            if (toggleContainer) {
+              toggleContainer.classList.remove("hidden");
+            }
+
+            const toggleBtn = document.getElementById("select-cat-toggle-btn");
+            let isExpanded = false;
+
+            if (toggleBtn) {
+              const newToggleBtn = toggleBtn.cloneNode(true);
+              toggleBtn.parentNode.replaceChild(newToggleBtn, toggleBtn);
+
+              newToggleBtn.addEventListener("click", () => {
+                const cards = grid.querySelectorAll(".movie-card");
+
+                if (!isExpanded) {
+                  cards.forEach((card) => {
+                    card.classList.remove("hidden", "md:hidden", "lg:block");
+                    card.classList.add("block");
+                  });
+                  newToggleBtn.textContent = "Voir moins";
+                  isExpanded = true;
+                } else {
+                  cards.forEach((card, index) => {
+                    if (index >= 2 && index < 4) {
+                      card.classList.remove("block");
+                      card.classList.add("hidden", "md:block");
+                    } else if (index >= 4) {
+                      card.classList.remove("block");
+                      card.classList.add("hidden", "md:hidden", "lg:block");
+                    }
+                  });
+                  newToggleBtn.textContent = "Voir plus";
+                  isExpanded = false;
+                }
+              });
+            }
           })
           .catch((error) => {
             console.error(
@@ -111,6 +165,7 @@ export function SelectCategory() {
             );
             grid.innerHTML =
               '<p class="text-black col-span-3 text-center">Erreur lors du chargement des films.</p>';
+            if (toggleContainer) toggleContainer.classList.add("hidden");
           });
       }
     });

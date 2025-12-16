@@ -4,6 +4,11 @@ export function MysteryFilms() {
       <h2 class="text-4xl font-bold mb-6 text-black">Mystery</h2>
       <div id="mystery-films-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       </div>
+      <div id="mystery-films-toggle-container" class="lg:hidden flex justify-center mt-6 hidden">
+        <button id="mystery-films-toggle-btn" class="bg-red-600 text-white text-2xl font-normal px-16 py-4 rounded-full hover:bg-red-700 transition">
+          Voir plus
+        </button>
+      </div>
     </section>
   `;
 
@@ -20,9 +25,17 @@ export function MysteryFilms() {
         const selectedMovies = shuffled.slice(0, 6);
 
         grid.innerHTML = selectedMovies
-          .map(
-            (movie) => `
-          <div class="relative w-full h-[250px] overflow-hidden group cursor-pointer">
+          .map((movie, index) => {
+            let hiddenClass = "";
+            if (index >= 2 && index < 4) {
+              hiddenClass = "hidden md:block";
+            }
+            if (index >= 4) {
+              hiddenClass = "hidden md:hidden lg:block";
+            }
+
+            return `
+          <div class="movie-card relative w-full h-[250px] overflow-hidden group cursor-pointer ${hiddenClass}" data-index="${index}">
             <img
               src="${movie.image_url}"
               alt="${movie.title}"
@@ -42,9 +55,46 @@ export function MysteryFilms() {
               </div>
             </div>
           </div>
-        `,
-          )
+        `;
+          })
           .join("");
+
+        const toggleContainer = document.getElementById(
+          "mystery-films-toggle-container",
+        );
+        if (toggleContainer) {
+          toggleContainer.classList.remove("hidden");
+        }
+
+        const toggleBtn = document.getElementById("mystery-films-toggle-btn");
+        let isExpanded = false;
+
+        if (toggleBtn) {
+          toggleBtn.addEventListener("click", () => {
+            const cards = grid.querySelectorAll(".movie-card");
+
+            if (!isExpanded) {
+              cards.forEach((card) => {
+                card.classList.remove("hidden", "md:hidden", "lg:block");
+                card.classList.add("block");
+              });
+              toggleBtn.textContent = "Voir moins";
+              isExpanded = true;
+            } else {
+              cards.forEach((card, index) => {
+                if (index >= 2 && index < 4) {
+                  card.classList.remove("block");
+                  card.classList.add("hidden", "md:block");
+                } else if (index >= 4) {
+                  card.classList.remove("block");
+                  card.classList.add("hidden", "md:hidden", "lg:block");
+                }
+              });
+              toggleBtn.textContent = "Voir plus";
+              isExpanded = false;
+            }
+          });
+        }
       })
       .catch((error) => {
         console.error("Erreur lors du chargement des films Mystery:", error);
